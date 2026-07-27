@@ -1,0 +1,23 @@
+<div class="public-page">
+    <div class="background-glow background-glow-left"></div>
+    <div class="background-glow background-glow-right"></div>
+
+    <header class="public-header">
+        <a class="brand" routerLink="/bienvenue">
+            <span class="brand-logo">
+                <span class="brand-logo-play"></span>
+            </span>
+
+            <span class="brand-name">What to Watch</span>
+        </a>
+    </header>
+
+    <main class="public-content public-content--{{variant}}">
+        <ng-content></ng-content>
+    </main>
+
+    <footer class="public-footer">
+        <span>© 2026 What to Watch</span>
+        <span>Vos séries. Votre classement. Vos recommandations.</span>
+    </footer>
+</div>

@@ -2,32 +2,26 @@ package com.whattowatch.dto;
 
 import com.whattowatch.entity.Role;
 
-public class AuthResponse {
+public class UserSessionResponse {
     private final Long userId;
     private final String email;
     private final Role role;
-    private final String message;
 
-    public AuthResponse(Long userId, String email, Role role, String message) {
+    public UserSessionResponse(Long userId, String email, Role role) {
         this.userId = userId;
         this.email = email;
         this.role = role;
-        this.message = message;
     }
 
-    public Long getUserId(){
+    public Long getUserId() {
         return userId;
     }
 
-    public String getEmail(){
+    public String getEmail() {
         return email;
     }
 
-    public Role getRole(){
+    public Role getRole() {
         return role;
-    }
-
-    public String getMessage(){
-        return message;
     }
 }

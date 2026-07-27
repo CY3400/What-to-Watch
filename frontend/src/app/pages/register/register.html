@@ -1,0 +1,87 @@
+<app-public-layout variant="auth">
+    <section class="auth-card">
+        <p class="auth-eyebrow">Bienvenue</p>
+        <h1>Créer votre compte</h1>
+        <p class="auth-description">Commencez à organiser vos séries et à découvrir vos prochaines recommandations.</p>
+
+        <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            <div class="form-field">
+                <label for="email" class="form-label">Adresse e-mail</label>
+                <input type="email" id="email" class="form-input" autocomplete="email" aria-describedby="email-error" formControlName="email">
+                <p class="form-error" id="email-error" aria-live="polite">
+                    @if (registerForm.controls.email.touched) {
+                        @if (registerForm.controls.email.hasError('required')) {
+                            L’adresse e-mail est obligatoire.
+                        }
+                        @else if (registerForm.controls.email.hasError('email')) {
+                            Saisissez une adresse e-mail valide.
+                        }
+                        @else if (registerForm.controls.email.hasError('maxlength')) {
+                            L’adresse e-mail ne peut pas dépasser 190 caractères.
+                        }
+                        @else if (registerForm.controls.email.hasError('emailTaken')) {
+                            Cette adresse e-mail est déjà utilisée.
+                        }
+                    }
+                </p>
+            </div>
+
+            <div class="form-field">
+                <label for="password" class="form-label">Mot de passe</label>
+                <div class="password-input">
+                    <input [type]="showPassword ? 'text' : 'password'" id="password" class="form-input" autocomplete="new-password" aria-describedby="password-error" formControlName="password">
+                    <button type="button" class="password-toggle" (click)="togglePassword()" [attr.aria-label]="!showPassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'">
+                        <app-icon [name]="!showPassword ? 'view' : 'hide'"></app-icon>
+                    </button>
+                </div>
+                <p class="form-error" id="password-error" aria-live="polite">
+                    @if (registerForm.controls.password.touched) {
+                        @if (registerForm.controls.password.hasError('required')) {
+                            Le mot de passe est obligatoire.
+                        }
+                        @else if (registerForm.controls.password.hasError('minlength')) {
+                            Le mot de passe doit contenir au moins 10 caractères.
+                        }
+                        @else if (registerForm.controls.password.hasError('maxlength')) {
+                            Le mot de passe ne peut pas dépasser 64 caractères.
+                        }
+                        @else if (registerForm.controls.password.hasError('passwordCharacters')) {
+                            Utilisez uniquement des caractères standards, sans accents ni caractères spéciaux étendus.
+                        }
+                        @else if (registerForm.controls.password.hasError('passwordStrength')) {
+                            Ajoutez au moins une majuscule, une minuscule, un chiffre et un caractère spécial.
+                        }
+                    }
+                </p>
+            </div>
+
+            <div class="form-field">
+                <label for="confirm-password" class="form-label">Confirmer le mot de passe</label>
+                <div class="password-input">
+                    <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirm-password" class="form-input" autocomplete="new-password" aria-describedby="confirm-password-error" formControlName="confirmPassword">
+                    <button type="button" class="password-toggle" (click)="toggleConfirmPassword()" [attr.aria-label]="!showConfirmPassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'">
+                        <app-icon [name]="!showConfirmPassword ? 'view' : 'hide'"></app-icon>
+                    </button>
+                </div>
+                <p class="form-error" id="confirm-password-error" aria-live="polite">
+                    @if (registerForm.controls.confirmPassword.touched) {
+                        @if (registerForm.controls.confirmPassword.hasError('required')) {
+                            La confirmation du mot de passe est obligatoire.
+                        }
+                        @else if (registerForm.hasError('passwordMismatch')) {
+                            Les mots de passe ne correspondent pas.
+                        }
+                    }
+                </p>
+            </div>
+
+            <div class="auth-actions">
+                <p class="form-error auth-server-error" aria-live="polite">
+                    {{ serverError() }}
+                </p>
+                <button class="button button-primary button-block" type="submit" [disabled]="isSubmitting()">{{ isSubmitting() ? 'Inscription en cours…' : "S'inscrire" }}</button>
+                <p class="auth-switch">Vous avez déjà un compte ? <a routerLink="/se-connecter">Se connecter</a></p>
+            </div>
+        </form>
+    </section>
+</app-public-layout>

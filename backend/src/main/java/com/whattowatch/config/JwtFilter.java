@@ -12,30 +12,30 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.whattowatch.exception.InvalidCredentialsException;
+import com.whattowatch.service.AuthCookieService;
 import com.whattowatch.service.JwtService;
 import com.whattowatch.service.MyUserDetailsService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    private static final String COOKIE_NAME = "jwt_token";
-
     private final JwtService jwtService;
     private final MyUserDetailsService userDetailsService;
+    private final AuthCookieService authCookieService;
 
-    public JwtFilter(JwtService jwtService, MyUserDetailsService userDetailsService) {
+    public JwtFilter(JwtService jwtService, MyUserDetailsService userDetailsService, AuthCookieService authCookieService) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.authCookieService = authCookieService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String token = extractToken(request);
+        String token = authCookieService.extractToken(request);
 
         if(token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
@@ -63,29 +63,5 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private String extractToken(HttpServletRequest request) {
-        String tokenFromCookie = extractTokenFromCookie(request);
-        if(tokenFromCookie != null && !tokenFromCookie.isBlank()) {
-            return tokenFromCookie;
-        }
-
-        return null;
-    }
-
-    private String extractTokenFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if(cookies == null) {
-            return null;
-        }
-
-        for (Cookie cookie : cookies) {
-            if(COOKIE_NAME.equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-
-        return null;
     }
 }

@@ -65,13 +65,9 @@ public class JwtService {
         }
     }
 
-    public String generateToken(String subjectEmail, String subjectRole) {
+    public String generateToken(String subjectEmail) {
         if (subjectEmail == null || subjectEmail.isBlank()) {
             throw new IllegalArgumentException("l'email du token est obligatoire");
-        }
-
-        if (subjectRole == null || subjectRole.isBlank()) {
-            throw new IllegalArgumentException("le rôle du token est obligatoire");
         }
 
         long now = clock.millis();
@@ -86,7 +82,6 @@ public class JwtService {
 
         return Jwts.builder()
                 .subject(subjectEmail)
-                .claim("role", subjectRole)
                 .issuedAt(new Date(now))
                 .expiration(new Date(expiration))
                 .signWith(signingKey)
@@ -116,42 +111,5 @@ public class JwtService {
 
     public String extractEmail(String token) {
         return extractClaim(token, claims -> claims.getSubject());
-    }
-
-    public String extractRole(String token) {
-        return extractClaim(token, claims -> claims.get("role", String.class));
-    }
-
-    public boolean isTokenValid(String token, String expectedEmail) {
-        if (token == null || token.isBlank() || expectedEmail == null || expectedEmail.isBlank()) {
-            return false;
-        }
-
-        try {
-            Claims claims = extractAllClaims(token);
-            String subject = claims.getSubject();
-
-            return subject != null && expectedEmail.equalsIgnoreCase(subject);
-        }
-        catch (InvalidCredentialsException ex) {
-            return false;
-        }
-    }
-
-    public boolean isAboutToExpire(String token, long thresholdMs) {
-        if (thresholdMs < 0) {
-            throw new IllegalArgumentException("Le seuil d'expiration ne peut pas être négatif");
-        }
-
-        Claims claims = extractAllClaims(token);
-        Date expiration = claims.getExpiration();
-
-        if (expiration == null) {
-            throw new InvalidCredentialsException("JWT sans date d'expiration");
-        }
-
-        long remainingMs = expiration.getTime() - clock.millis();
-
-        return remainingMs <= thresholdMs;
     }
 }

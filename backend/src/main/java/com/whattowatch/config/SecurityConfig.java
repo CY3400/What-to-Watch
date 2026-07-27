@@ -44,10 +44,8 @@ public class SecurityConfig {
                     HttpMethod.POST,
                     "/api/auth/register",
                     "/api/auth/login",
-                    "/api/auth/logout",
-                    "/api/auth/email-available"
+                    "/api/auth/logout"
                 ).permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

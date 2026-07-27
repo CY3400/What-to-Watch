@@ -7,27 +7,29 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
+import com.whattowatch.dto.ApiErrorResponse;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    private final ObjectMapper objectMapper;
+
+    public CustomAuthenticationEntryPoint(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
 
-        String body = """
-                        {
-                            "timestamp": "%s",
-                            "status": 401,
-                            "error": "Unauthorized",
-                            "message": "Authentification requise"
-                        }
-                        """.formatted(java.time.OffsetDateTime.now());
+        ApiErrorResponse body = new ApiErrorResponse(401, "Unauthorized", "Authentification requise", null, null);
 
-        response.getWriter().write(body);
+        objectMapper.writeValue(response.getWriter(), body);
     }
 }

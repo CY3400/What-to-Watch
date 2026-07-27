@@ -1,6 +1,5 @@
 package com.whattowatch.exception;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,55 +9,46 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.whattowatch.dto.ApiErrorResponse;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(buildMap(ex.getMessage(), 409, "Conflict", null));
+    public ResponseEntity<ApiErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        ApiErrorResponse body = new ApiErrorResponse(409, "Conflict", ex.getMessage(), null, null);
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidCredentials(InvalidCredentialsException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(buildMap(ex.getMessage(), 401, "Unauthorized", null));
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex) {
+        ApiErrorResponse body = new ApiErrorResponse(401, "Unauthorized", ex.getMessage(), null, null);
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(buildMap(ex.getMessage(), 404, "Not Found", null));
+    public ResponseEntity<ApiErrorResponse> handleResourceNotFound(ResourceNotFoundException ex) {
+        ApiErrorResponse body = new ApiErrorResponse(404, "Not Found", ex.getMessage(), null, null);
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleBadRequests(BadRequestException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildMap(ex.getMessage(), 400, "Bad Request", ex.getCode()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        Map<String, Object> body = new HashMap<>();
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(error -> errors.putIfAbsent(error.getField(), error.getDefaultMessage()));
-
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", 400);
-        body.put("error", "Bad Request");
-        body.put("message", "Erreur de validation");
-        body.put("errors", errors);
+    public ResponseEntity<ApiErrorResponse> handleBadRequests(BadRequestException ex) {
+        ApiErrorResponse body = new ApiErrorResponse(400, "Bad Request", ex.getMessage(), ex.getCode(), null);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
-    private Map<String, Object> buildMap(String message, Integer value, String error, String code) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", value);
-        body.put("error", error);
-        body.put("message", message);
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
 
-        if(code != null) {
-            body.put("code", code);
-        }
+        ex.getBindingResult().getFieldErrors().forEach(error -> errors.putIfAbsent(error.getField(), error.getDefaultMessage()));
 
-        return body;
+        ApiErrorResponse body = new ApiErrorResponse(400, "Bad Request", "Erreur de validation", null, errors);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 }

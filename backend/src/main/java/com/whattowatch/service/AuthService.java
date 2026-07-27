@@ -1,13 +1,11 @@
 package com.whattowatch.service;
 
-import java.util.Locale;
-
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import com.whattowatch.dto.AuthResponse;
+import com.whattowatch.dto.UserSessionResponse;
 import com.whattowatch.dto.AuthResult;
 import com.whattowatch.dto.LoginRequest;
 import com.whattowatch.dto.RegisterRequest;
@@ -15,6 +13,7 @@ import com.whattowatch.entity.User;
 import com.whattowatch.exception.EmailAlreadyExistsException;
 import com.whattowatch.exception.InvalidCredentialsException;
 import com.whattowatch.repository.UserRepository;
+import com.whattowatch.util.EmailUtils;
 
 @Service
 public class AuthService {
@@ -30,7 +29,7 @@ public class AuthService {
 
     @Transactional
     public AuthResult register(RegisterRequest request) {
-        String email = normalizeEmail(request.getEmail());
+        String email = EmailUtils.normalize(request.getEmail());
         String rawPassword = request.getPassword();
 
         if(userRepository.existsByEmailIgnoreCase(email)) {
@@ -44,11 +43,11 @@ public class AuthService {
         try {
             User savedUser = userRepository.saveAndFlush(user);
 
-            AuthResponse response =  buildAuthResponse(savedUser, "Inscription réussie");
+            UserSessionResponse response =  buildUserSessionResponse(savedUser);
 
-            String token = jwtService.generateToken(savedUser.getEmail(), savedUser.getRole().name());
+            String token = jwtService.generateToken(savedUser.getEmail());
 
-            return buildAuthResult(response, token);
+            return new AuthResult(response, token);
         }
         catch (DataIntegrityViolationException ex) {
             throw new EmailAlreadyExistsException("Email déjà utilisé");
@@ -57,7 +56,7 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResult login(LoginRequest request) {
-        String email = normalizeEmail(request.getEmail());
+        String email = EmailUtils.normalize(request.getEmail());
         String password = request.getPassword();
         
         User user = userRepository.findByEmailIgnoreCase(email).orElseThrow(() -> new InvalidCredentialsException("Identifiants invalides"));
@@ -66,27 +65,14 @@ public class AuthService {
             throw new InvalidCredentialsException("Identifiants invalides");
         }
 
-        AuthResponse response =  buildAuthResponse(user, "Connexion réussie");
+        UserSessionResponse response =  buildUserSessionResponse(user);
 
-        String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
+        String token = jwtService.generateToken(user.getEmail());
 
-        return buildAuthResult(response, token);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isEmailAvailable(String email) {
-        return !userRepository.existsByEmailIgnoreCase(normalizeEmail(email));
-    }
-
-    private String normalizeEmail(String email) {
-        return email.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private AuthResponse buildAuthResponse(User user, String message) {
-        return new AuthResponse(user.getId(), user.getEmail(), user.getRole(), message);
-    }
-
-    private AuthResult buildAuthResult(AuthResponse response, String token) {
         return new AuthResult(response, token);
+    }
+
+    private UserSessionResponse buildUserSessionResponse(User user) {
+        return new UserSessionResponse(user.getId(), user.getEmail(), user.getRole());
     }
 }

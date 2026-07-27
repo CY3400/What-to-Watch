@@ -1,0 +1,55 @@
+<app-public-layout variant="auth">
+    <section class="auth-card">
+        <p class="auth-eyebrow">Bienvenue</p>
+        <h1>Connectez-vous</h1>
+        <p class="auth-description">Continuez à organiser vos séries et à découvrir vos prochaines recommandations.</p>
+
+        <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <div class="form-field">
+                <label for="email" class="form-label">Adresse e-mail</label>
+                <input type="email" id="email" class="form-input" autocomplete="email" aria-describedby="email-error" formControlName="email">
+                <p class="form-error" id="email-error" aria-live="polite">
+                    @if (loginForm.controls.email.touched) {
+                        @if (loginForm.controls.email.hasError('required')) {
+                            L’adresse e-mail est obligatoire.
+                        }
+                        @else if (loginForm.controls.email.hasError('email')) {
+                            Saisissez une adresse e-mail valide.
+                        }
+                        @else if (loginForm.controls.email.hasError('maxlength')) {
+                            L’adresse e-mail ne peut pas dépasser 190 caractères.
+                        }
+                    }
+                </p>
+            </div>
+
+            <div class="form-field">
+                <label for="password" class="form-label">Mot de passe</label>
+                <div class="password-input">
+                    <input [type]="showPassword ? 'text' : 'password'" id="password" class="form-input" autocomplete="current-password" aria-describedby="password-error" formControlName="password">
+                    <button type="button" class="password-toggle" (click)="togglePassword()" [attr.aria-label]="!showPassword ? 'Afficher le mot de passe' : 'Masquer le mot de passe'">
+                        <app-icon [name]="!showPassword ? 'view' : 'hide'"></app-icon>
+                    </button>
+                </div>
+                <p class="form-error" id="password-error" aria-live="polite">
+                    @if (loginForm.controls.password.touched) {
+                        @if (loginForm.controls.password.hasError('required')) {
+                            Le mot de passe est obligatoire.
+                        }
+                        @else if (loginForm.controls.password.hasError('maxlength')) {
+                            Le mot de passe ne peut pas dépasser 64 caractères.
+                        }
+                    }
+                </p>
+            </div>
+
+            <div class="auth-actions">
+                <p class="form-error auth-server-error" aria-live="polite">
+                    {{ serverError() }}
+                </p>
+                <button class="button button-primary button-block" type="submit" [disabled]="isSubmitting()">{{ isSubmitting() ? 'Connexion en cours…' : 'Se connecter' }}</button>
+                <p class="auth-switch">Vous n’avez pas encore de compte ? <a routerLink="/s-enregistrer">S’inscrire</a></p>
+            </div>
+        </form>
+    </section>
+</app-public-layout>
