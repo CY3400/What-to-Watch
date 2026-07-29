@@ -1,1 +1,32 @@
-<p>home works!</p>
+@if (isLoading()) {
+    <p>Chargement des séries...</p>
+}
+@else if (errorMessage()) {
+    <p>{{ errorMessage() }}</p>
+}
+@else {
+    <h1 class="page-title">Séries populaires</h1>
+    <section class="series-grid">
+        @for (serie of series; track serie.id) {
+            <article class="series-card">
+                @if (getPosterUrl(serie.posterPath); as posterUrl) {
+                    <img class="series-poster" [src]="posterUrl" [alt]="'Affiche de ' + serie.name">
+                }
+                @else {
+                    <p>Aucune image disponible.</p>
+                }
+                <div class="series-content">
+                    <h2 class="series-title">{{ serie.name }}</h2>
+                    <div class="series-meta">
+                        <p>Première diffusion : {{ serie.firstAirDate }}</p>
+                        <p>Note : {{ serie.voteAverage }}/10</p>
+                    </div>
+                    <p class="series-overview">{{ serie.overview }}</p>
+                </div>
+            </article>
+        }
+        @empty {
+            <p>Aucune série trouvée</p>
+        }
+    </section>
+}
